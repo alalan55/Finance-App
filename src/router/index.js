@@ -34,6 +34,22 @@ const routes = [
         requiresAuth: true
       }
   },
+  {
+    path: '/entradas',
+    name: 'Entrada',
+    component: () => import(/* webpackChunkName: "entradas" */ "../views/Entradas.vue"),
+    meta:{
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/saidas',
+    name: 'Saida',
+    component: () => import(/* webpackChunkName: "entradas" */ "../views/Saidas.vue"),
+    meta:{
+      requiresAuth: true
+    }
+  }
 ];
 
 const router = new VueRouter({
