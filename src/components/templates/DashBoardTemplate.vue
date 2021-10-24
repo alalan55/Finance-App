@@ -44,142 +44,65 @@
         </div>
       </div>
 
-      <div class="graph dashBoard"></div>
+      <div class="graph dashBoard">
+        <div class="block">
+          <div class="dash" v-if="arrEntradas.length">
+            <LineChart
+              :chartData="arrEntradas"
+              :options="chartOptions"
+              label="Entradas"
+            />
+          </div>
+        </div>
+      </div>
 
       <!-- PODE SER UM COMPONENTE SEPARADO -->
-      <div class="infos-right infoRight">
-        <ul>
-          <li class="item entrada">
-            <div class="title">
-              <span>Entrada</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item saida">
-            <div class="title">
-              <span>Saída</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item entrada">
-            <div class="title">
-              <span>Entrada</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item saida">
-            <div class="title">
-              <span>Saída</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item entrada">
-            <div class="title">
-              <span>Entrada</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item saida">
-            <div class="title">
-              <span>Saída</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item saida">
-            <div class="title">
-              <span>Saída</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item saida">
-            <div class="title">
-              <span>Saída</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-
-          <li class="item saida">
-            <div class="title">
-              <span>Saída</span>
-            </div>
-            <div class="content">
-              <div class="valor">
-                <span>R$ 300,00</span>
-              </div>
-              <div class="data">
-                <span>25/05/2021</span>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
+      <ListaEntradaSaida :list="financas" class="infos-right infoRight" />
     </div>
   </div>
 </template>
 
+<script>
+import moment from "moment";
+import { ListaEntradaSaida, LineChart } from "@/components/organisms";
+export default {
+  data() {
+    return {
+      financas: [],
+      arrEntradas: [],
+      arrSaidas: [],
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+      },
+    };
+  },
+  components: {
+    ListaEntradaSaida,
+    LineChart,
+  },
+  created() {
+    this.initTodasFinancas();
+  },
+  methods: {
+    async initTodasFinancas() {
+      await this.$store.dispatch("getAllFinances");
+      this.financas = await this.$store.getters.$allFinances;
+
+      this.financas.forEach((d) => {
+        const date = moment(d.data_movimentacao).format("MM/DD");
+
+        if (d.tipo_movimentacao == "entrada") {
+          this.arrEntradas.push({ date, totals: d });
+        } else {
+          this.arrSaidas.push({ date, totals: d });
+        }
+        // console.log(this.arrEntradas)
+      });
+    },
+  },
+};
+</script>
 
 <style lang="scss" scoped>
 .dash-board {
@@ -290,6 +213,11 @@
     }
     .dashBoard {
       grid-area: dashBoard;
+      // width: 100%;
+      // position: relative;
+      // margin: auto;
+      // height: 80vh;
+      // width: 80vw;
     }
     .infoRight {
       grid-area: infoRight;
@@ -342,14 +270,84 @@
       border: 1px solid #bebdbd;
       border-radius: 10px;
       padding: 0.5rem;
+      background: white;
     }
   }
 }
-.entrada {
-  border-left: 7px solid rgb(60, 238, 60) !important;
-  //  background:rgb(112, 226, 112) ;
-}
-.saida {
-  border-left: 7px solid rgb(238, 72, 60) !important;
+
+@media screen and (max-width: 850px) {
+  .dash-board {
+    min-height: calc(100vh - 70px);
+    .container-dashboard {
+      width: 100%;
+     // border: 1px solid red !important;
+      grid-template-rows: repeat(1fr, 5);
+      grid-template-columns: repeat(1fr, 1);
+      gap: 1.5rem;
+      grid-template-areas:
+        // "ultimaEntrada ultimaEntrada ultimaEntrada"
+        // "ultimaSaida ultimaSaida ultimaSaida"
+        // "total total total "
+        // "dashBoard dashBoard dashBoard"
+        // "infoRight infoRight infoRight"
+
+        "ultimaEntrada ultimaEntrada"
+        "ultimaSaida ultimaSaida"
+        "total total"
+        "dashBoard dashBoard"
+        "infoRight infoRight" !important;
+
+      .ultimaEntrada {
+        height: 8rem;
+        .title {
+          span {
+            font-size: 1rem;
+          }
+        }
+        .content {
+          .valor {
+            .val {
+              font-size: 1.2rem;
+            }
+          }
+          .data {
+            .date {
+              font-size: 1.2rem;
+            }
+          }
+        }
+      }
+      .ultimaSaida {
+        height: 8rem;
+        .title {
+          span {
+            font-size: 1rem;
+          }
+        }
+        .content {
+          .valor {
+            .val {
+              font-size: 1.2rem;
+            }
+          }
+          .data {
+            .date {
+              font-size: 1.2rem;
+            }
+          }
+        }
+      }
+      .total {
+        height: 8rem;
+      }
+      .dashBoard {
+        // height: 80vh;
+        // width: 90vw;
+      }
+      .infoRight {
+        height: 80vh;
+      }
+    }
+  }
 }
 </style>

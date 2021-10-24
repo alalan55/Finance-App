@@ -6,7 +6,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     user: localStorage.getItem('user') || {},
-    token: localStorage.getItem('token') || null
+    token: localStorage.getItem('token') || null,
+    allFinances: []
   },
   mutations: {
     USUARIO_LOAGDO(state, user){
@@ -17,6 +18,9 @@ export default new Vuex.Store({
     },
     APAGAR_TOKEN(state){
       state.token = null
+    },
+    TODAS_AS_FINANCAS(state, finance){
+        state.allFinances = finance
     }
   },
   actions: {
@@ -58,7 +62,6 @@ export default new Vuex.Store({
             Authorization: localStorage.getItem('token')
           })
           
-          
           if(req.status == 200){
             localStorage.removeItem('token')
             localStorage.removeItem('user')
@@ -72,11 +75,26 @@ export default new Vuex.Store({
 
 
       }
+    },
+    async getAllFinances(context){
+      try {
+        let req = await fetch(`${process.env.VUE_APP_ROUTE}/movimentation`)
+        let res = await req.json()
+       // console.log(res)
+        context.commit('TODAS_AS_FINANCAS', res)
+        
+      } catch (error) {
+          console.error(error)
+      }
     }
   },
   getters:{
     $loggedIn(state) {
       return state.token != null
     },
+    $allFinances(state){
+    //  console.log(state.allFinances)
+      return state.allFinances
+    }
   }
 });
